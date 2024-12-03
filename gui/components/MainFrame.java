@@ -5,6 +5,8 @@ import java.awt.Dimension;
 
 import javax.swing.JFrame;
 
+import gui.components.menubar.MenuBar;
+
 public class MainFrame extends JFrame{
 	private SheetMusicCanvas canvas;
 	private ControlPanel controlPanel;
