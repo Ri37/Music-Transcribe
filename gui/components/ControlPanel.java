@@ -17,12 +17,12 @@ import javax.swing.JPanel;
 
 import gui.Constants;
 
-public class MenuBarPanel extends JPanel {
+public class ControlPanel extends JPanel {
     private final SheetMusicCanvas canvas;
     private final JFrame frame;
     private final List<JButton> buttons = new ArrayList<>();
 
-    public MenuBarPanel(SheetMusicCanvas canvas, JFrame frame) {
+    public ControlPanel(SheetMusicCanvas canvas, JFrame frame) {
         this.canvas = canvas;
         this.frame = frame;
 

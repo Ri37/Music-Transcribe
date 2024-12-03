@@ -7,7 +7,8 @@ import javax.swing.JFrame;
 
 public class MainFrame extends JFrame{
 	private SheetMusicCanvas canvas;
-	private MenuBarPanel menuBar;
+	private ControlPanel controlPanel;
+	private MenuBar menuBar;
 	
 	public MainFrame() {
 		super("Sheet Music Maker");
@@ -16,10 +17,12 @@ public class MainFrame extends JFrame{
 		
 		setLayout(new BorderLayout());
 		canvas = new SheetMusicCanvas();
-		menuBar = new MenuBarPanel(canvas, this);
+		controlPanel = new ControlPanel(canvas, this);
+		menuBar = new MenuBar();
 		
 		add(canvas, BorderLayout.CENTER);
-		add(menuBar, BorderLayout.WEST);
+		add(controlPanel, BorderLayout.WEST);
+		setJMenuBar(menuBar);
 		
 		pack();
 		setVisible(true);
