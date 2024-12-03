@@ -17,6 +17,8 @@ public class MenuBar extends JMenuBar {
 	private JMenuItem infoMenuItem;
 	
 	public MenuBar() {
+		super();
+		
 		fileMenu = new JMenu("File");
 		newSheetMenuItem = new JMenuItem();
 		saveSheetMenuItem = new JMenuItem();
