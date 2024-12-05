@@ -27,6 +27,7 @@ public class MainFrame extends JFrame{
 		setJMenuBar(menuBar);
 		
 		pack();
+		setLocationRelativeTo(null);
 		setVisible(true);
 	}
 }
