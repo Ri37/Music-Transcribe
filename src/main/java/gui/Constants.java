@@ -12,4 +12,6 @@ public class Constants {
 
     public static final double ZOOM_MIN = 0.5;
     public static final double ZOOM_MAX = 3.0;
+
+    public static final int NOTES_PER_ROW = 16;
 }
