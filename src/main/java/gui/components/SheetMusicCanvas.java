@@ -17,13 +17,13 @@ import gui.Constants;
 import gui.Page;
 
 public class SheetMusicCanvas extends JPanel implements MouseWheelListener, MouseMotionListener, MouseListener {
-	private final Page page;
 	private final Camera camera;
+	private Page page;
 	private Point lastMousePosition;
 	private int menuBarWidth;
 
 	public SheetMusicCanvas() {
-		this.page = new Page();
+		this.page = Page.createBociBociPage();
 		this.camera = new Camera();
 		setBackground(Color.WHITE);
 
@@ -34,6 +34,13 @@ public class SheetMusicCanvas extends JPanel implements MouseWheelListener, Mous
 
 	public Camera getCamera() {
 		return camera;
+	}
+
+	public void setPage(Page page) {
+		this.page = page;
+		System.out.println("New page set with rows: " + this.page.getRows().size());
+		revalidate();
+		repaint();
 	}
 
 	public Page getPage() {
