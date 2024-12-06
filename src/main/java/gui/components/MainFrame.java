@@ -20,7 +20,7 @@ public class MainFrame extends JFrame{
 		setLayout(new BorderLayout());
 		canvas = new SheetMusicCanvas();
 		controlPanel = new ControlPanel(canvas, this);
-		menuBar = new MenuBar(this);
+		menuBar = new MenuBar(canvas, this);
 		
 		add(canvas, BorderLayout.CENTER);
 		add(controlPanel, BorderLayout.WEST);
