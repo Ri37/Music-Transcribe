@@ -7,13 +7,20 @@ import java.util.List;
 public class Page {
     private final List<SheetRow> rows;
 
+    public Page(List<SheetRow> initialRows) {
+        rows = initialRows != null ? initialRows : new ArrayList<>();
+
+        while (rows.size() < Constants.ROW_STARTER_NUM) {
+            addRow();
+        }
+    }
+
     public Page() {
         rows = new ArrayList<>();
+
         for (int i = 0; i < Constants.ROW_STARTER_NUM; i++) {
             addRow();
         }
-
-        addBociBociToSheetRow();
     }
 
     public List<SheetRow> getRows() {
@@ -35,10 +42,12 @@ public class Page {
         }
     }
 
-    private void addBociBociToSheetRow() {
-        SheetRow firstRow = rows.get(0);
-        SheetRow secondRow = rows.get(1);
-        SheetRow thirdRow = rows.get(2);
+    public static Page createBociBociPage() {
+        Page page = new Page();
+
+        SheetRow firstRow = page.rows.get(0);
+        SheetRow secondRow = page.rows.get(1);
+        SheetRow thirdRow = page.rows.get(2);
     
         // Elso utem: Boci boci tarka
         firstRow.addNote(new Note(-2, "8th"));  // Bo-
@@ -86,5 +95,7 @@ public class Page {
         thirdRow.addNote(new Note(12, "8th"));  // jet
         thirdRow.addNote(new Note(13, "quarter")); // kap-
         thirdRow.addNote(new Note(14, "quarter")); // ni
+
+        return page;
     }      
 }
