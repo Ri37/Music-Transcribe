@@ -10,7 +10,7 @@ import audio.AudioProcessor;
 import audio.AudioSampler;
 import audio.Transcriber;
 
-import audio.DummyAudioProcessor;
+import audio.FFmpegAudioProcessor;
 import audio.DummyAudioSampler;
 import audio.DummyTranscriber;
 
@@ -23,7 +23,6 @@ import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 public class OpenAudioAction extends AbstractAction {
 
@@ -57,7 +56,7 @@ public class OpenAudioAction extends AbstractAction {
 			File audioFile = fileChooser.getSelectedFile();
 
 			// Convert to desired format
-			AudioProcessor audioProcessor = new DummyAudioProcessor(44100, "pcm_s16le", 1);
+			AudioProcessor audioProcessor = new FFmpegAudioProcessor(44100, "pcm_s16le", 1);
 			audioProcessor.processFile(audioFile);
 
 			// Retrieve raw samples
