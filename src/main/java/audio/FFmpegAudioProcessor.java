@@ -39,4 +39,11 @@ public class FFmpegAudioProcessor extends AudioProcessor {
 			throw new RuntimeException("Failed to process audio file: " + e.getMessage(), e);
 		}
 	}
+
+	@Override
+	public void close() {
+		if (this.outputFile != null && this.outputFile.exists()) {
+			this.outputFile.delete();
+		}
+	}
 }

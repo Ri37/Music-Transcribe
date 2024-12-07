@@ -17,4 +17,9 @@ public abstract class AudioProcessor {
 	}
 
 	public abstract void processFile(File audioFile);
+	public abstract void close();
+
+	public final File getOutputFile() {
+		return this.outputFile;
+	}
 }

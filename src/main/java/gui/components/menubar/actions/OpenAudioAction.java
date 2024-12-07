@@ -11,7 +11,7 @@ import audio.AudioSampler;
 import audio.Transcriber;
 
 import audio.FFmpegAudioProcessor;
-import audio.DummyAudioSampler;
+import audio.FFmpegAudioSampler;
 import audio.DummyTranscriber;
 
 import java.awt.event.ActionEvent;
@@ -60,8 +60,10 @@ public class OpenAudioAction extends AbstractAction {
 			audioProcessor.processFile(audioFile);
 
 			// Retrieve raw samples
-			AudioSampler<short[]> audioSampler = new DummyAudioSampler(audioProcessor);
+			AudioSampler<short[]> audioSampler = new FFmpegAudioSampler(audioProcessor, "s16le");
 			short[] samples = audioSampler.getSamples();
+
+			audioProcessor.close();
 
 			// AI transcribe logic returns the Notes
 			Transcriber<short[]> transcriber = new DummyTranscriber();
