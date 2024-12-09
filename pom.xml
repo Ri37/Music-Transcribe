@@ -32,6 +32,13 @@
       </plugin>
     </plugins>
   </build>
+  <repositories>
+    <repository>
+      <id>be.0110.repo-releases</id>
+      <name>0110.be repository</name>
+      <url>https://mvn.0110.be/releases</url>
+    </repository>
+  </repositories>
   <dependencies>
     <dependency>
       <groupId>org.bytedeco</groupId>
@@ -43,6 +50,16 @@
       <artifactId>junit-jupiter</artifactId>
       <version>5.11.3</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>be.tarsos.dsp</groupId>
+      <artifactId>core</artifactId>
+      <version>2.5</version>
+    </dependency>
+    <dependency>
+      <groupId>be.tarsos.dsp</groupId>
+      <artifactId>jvm</artifactId>
+      <version>2.5</version>
     </dependency>
   </dependencies>
 </project>
