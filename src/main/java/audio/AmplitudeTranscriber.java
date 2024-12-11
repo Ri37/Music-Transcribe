@@ -19,7 +19,8 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
         // Needs to be converted to float and scaled down to be between -1 and 1
         float[] scaledSamples = new float[samples.length];
         for (int i = 0; i < samples.length; i++) {
-            scaledSamples[i] = (float) samples[i] / Float.MAX_VALUE;
+            scaledSamples[i] = ((float) samples[i] / Short.MAX_VALUE);
+            System.out.println(scaledSamples[i]);
         }
 
         // Convert ampitudes to pitches from 23ms long buffers with 50% overlap
@@ -61,19 +62,26 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
 
     //DEBUG:
     private static short[] generateTestSignal() {
-        // Generates a simple sine wave signal for testing (440 Hz, A4)
-        int sampleRate = 44100;
-        double frequency = 440.0; // A4
-        int duration = 2; // 2 seconds
-        short[] signal = new short[sampleRate * duration];
-        for (int i = 0; i < signal.length; i++) {
-            signal[i] = (short) Math.sin(2 * Math.PI * frequency * i / sampleRate);
+        int sampleRate = 44100; // 44.1 kHz
+        double frequency = 440.0; // A4 pitch
+        int durationSeconds = 2; // 2 seconds
+        int totalSamples = sampleRate * durationSeconds;
+    
+        short[] signal = new short[totalSamples];
+        double amplitude = 32767; // Maximum amplitude for short
+    
+        for (int i = 0; i < totalSamples; i++) {
+            // Generate sine wave signal
+            signal[i] = (short) (amplitude * Math.sin(2 * Math.PI * frequency * i / sampleRate));
         }
+    
         return signal;
     }
+    
 
     public static void main(String[] args) {
         short[] testSignal = generateTestSignal();
+        // for (short signal : testSignal) {System.err.println(signal);}
         AmplitudeTranscriber a = new AmplitudeTranscriber();
         a.transcribe(testSignal);
     }
