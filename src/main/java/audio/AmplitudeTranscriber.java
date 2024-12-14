@@ -1,9 +1,12 @@
 package audio;
 
-import be.tarsos.dsp.pitch.AMDF;
+import java.util.ArrayList;
+
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
+
 import gui.Note;
+import audio.FrequencyToNoteMap;
 
 public class AmplitudeTranscriber implements Transcriber<short[]>{
 
@@ -11,12 +14,20 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
     static int sampleRate = 44100;
     static int bufferSize = 1024;
     static int overlap = 512;
+    static float bufferLengthMs = (float) bufferSize / sampleRate;
+    static float stepLengthMs = bufferLengthMs - (float) overlap / sampleRate;
+
+    public record NoteSketch (
+        int noteNum,
+        float startTime, 
+        float endTime
+    ){}
 
     public Note[] transcribe(short[] samples) {
 
-        float[] pitches = new float[(samples.length / (bufferSize - overlap)) + 1];        
+        float[] pitches = new float[samples.length / (bufferSize - overlap)];        
 
-        // Needs to be converted to float and scaled down to be between -1 and 1
+        // Samples need to be converted to float and scaled down to be between -1 and 1
         float[] scaledSamples = new float[samples.length];
         for (int i = 0; i < samples.length; i++) {
             scaledSamples[i] = ((float) samples[i] / Short.MAX_VALUE);
@@ -36,6 +47,7 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
         }
 
         // Convert remaining smaller-than-buffer sized part, if its presetn
+        
         if (iterator < (scaledSamples.length - 1)) {
             float[] samplePiece = new float[(scaledSamples.length - 1) - (iterator - 1)];
             System.arraycopy(scaledSamples, iterator, samplePiece, 0, (scaledSamples.length - 1) - (iterator - 1));
@@ -55,6 +67,30 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
         // (every pitch element other then the last represents a 23ms piece's pitch, with a 23/2 offset,
         // last does for a (full length - iterator) / 44.100)ms piece)
         // TODO: summarize the pitch-time pairs and create notes [summary, pitch-note table]
+
+        ArrayList<NoteSketch> notesAndTimes = new ArrayList<>();
+        int firstNoteInd = 0;
+        Integer firstNotePitch = FrequencyToNoteMap.getNoteFromFrequency(pitches[firstNoteInd]);
+        while(firstNotePitch == null) {
+            firstNotePitch =  FrequencyToNoteMap.getNoteFromFrequency(pitches[firstNoteInd++]);
+        }
+
+        NoteSketch firstNoteSketch = new NoteSketch(firstNotePitch.intValue(), firstNoteInd * bufferLengthMs, (firstNoteInd * bufferLengthMs) + bufferLengthMs);
+        notesAndTimes.add(new NoteSketch(previousNote, 0, bufferSize / sampleRate));
+
+        for (int i = 1; i < pitches.length; i++) {
+            Integer currentNote = FrequencyToNoteMap.getNoteFromFrequency(pitches[i]);
+            if (currentNote == null) {
+                continue;
+            }
+
+            if (notesAndTimes.get(notesAndTimes.size()-1).noteNum == currentNote.intValue()) {
+                // lengthen prev sound 
+            }
+            // add new sound to list
+        }
+
+        //create Note list
 
 
         return new Note[0];
