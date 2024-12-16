@@ -15,13 +15,20 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
     static int bufferSize = 1024;
     static int overlap = 512;
     static float bufferLengthMs = (float) bufferSize / sampleRate;
-    static float stepLengthMs = bufferLengthMs - (float) overlap / sampleRate;
+    static float overlapMs = (float) overlap / sampleRate;
 
     public record NoteSketch (
         int noteNum,
         float startTime, 
-        float endTime
-    ){}
+        float endTime,
+        int pitchIndex
+    ){
+        //DEBUG
+        @Override
+        public String toString() {
+            return "Note: " + noteNum + "\nStart Time: " + startTime + "\nEnd Time: " + endTime + "\nPitchindex: " + pitchIndex; 
+        }
+    }
 
     public Note[] transcribe(short[] samples) {
 
@@ -72,24 +79,48 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
         int firstNoteInd = 0;
         Integer firstNotePitch = FrequencyToNoteMap.getNoteFromFrequency(pitches[firstNoteInd]);
         while(firstNotePitch == null) {
+            if (firstNoteInd == pitches.length) {
+                break;
+            }
             firstNotePitch =  FrequencyToNoteMap.getNoteFromFrequency(pitches[firstNoteInd++]);
         }
 
-        NoteSketch firstNoteSketch = new NoteSketch(firstNotePitch.intValue(), firstNoteInd * bufferLengthMs, (firstNoteInd * bufferLengthMs) + bufferLengthMs);
-        notesAndTimes.add(new NoteSketch(previousNote, 0, bufferSize / sampleRate));
+        if (firstNotePitch != null) {
+            NoteSketch firstNoteSketch = new NoteSketch(firstNotePitch.intValue(), 
+                firstNoteInd * (bufferLengthMs - overlapMs), firstNoteInd * (bufferLengthMs - overlapMs) + bufferLengthMs,
+                firstNoteInd);
+            notesAndTimes.add(firstNoteSketch);
 
-        for (int i = 1; i < pitches.length; i++) {
-            Integer currentNote = FrequencyToNoteMap.getNoteFromFrequency(pitches[i]);
-            if (currentNote == null) {
-                continue;
-            }
+            //last buffer shorter, later?
+            for (int i = firstNoteInd + 1; i < pitches.length - 1; i++) {
+                Integer currentNote = FrequencyToNoteMap.getNoteFromFrequency(pitches[i]);
+                if (currentNote == null) {
+                    continue;
+                }
 
-            if (notesAndTimes.get(notesAndTimes.size()-1).noteNum == currentNote.intValue()) {
-                // lengthen prev sound 
+                NoteSketch previousNoteSketch = notesAndTimes.get(notesAndTimes.size()-1);
+                // if the directly previous pitch was the same, just lengthen it
+                if ( previousNoteSketch.pitchIndex == i - 1 && previousNoteSketch.noteNum == currentNote.intValue()) {
+                    // lengthen prev sound 
+                    NoteSketch newValue = new NoteSketch(currentNote.intValue(), previousNoteSketch.startTime, 
+                        previousNoteSketch.endTime + bufferLengthMs, i);
+                    notesAndTimes.set(notesAndTimes.size()-1, newValue);
+                }
+                // add new sound to list 
+                else {
+                    NoteSketch newNote = new NoteSketch(currentNote.intValue(), i * (bufferLengthMs - overlapMs), 
+                        i * (bufferLengthMs - overlapMs) + bufferLengthMs, i);
+                    notesAndTimes.add(newNote);
+                }
             }
-            // add new sound to list
         }
 
+        //DEBUG
+        for (NoteSketch n : notesAndTimes) {
+            System.err.println(n);
+        }
+
+        //valamiért megduplázódik a hossz
         //create Note list
 
 
@@ -100,7 +131,7 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
     private static short[] generateTestSignal() {
         int sampleRate = 44100; // 44.1 kHz
         double frequency = 440.0; // A4 pitch
-        int durationSeconds = 2; // 2 seconds
+        int durationSeconds = 1; // 2 seconds
         int totalSamples = sampleRate * durationSeconds;
     
         short[] signal = new short[totalSamples];
