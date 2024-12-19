@@ -1,6 +1,12 @@
 package gui;
 
 public class Constants {
+    public static enum CanvasMode {
+        DRAG,
+        ADD,
+        DELETE
+    }
+
     public static final int ROW_STARTER_NUM = 8;
     public static final int ROW_WIDTH = 800;
     public static final int ROW_SPACING = 100;

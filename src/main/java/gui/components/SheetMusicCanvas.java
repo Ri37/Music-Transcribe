@@ -14,9 +14,12 @@ import javax.swing.JPanel;
 
 import gui.Camera;
 import gui.Constants;
+import gui.Constants.CanvasMode;
 import gui.Page;
 
 public class SheetMusicCanvas extends JPanel implements MouseWheelListener, MouseMotionListener, MouseListener {
+	private CanvasMode mode;
+
 	private final Camera camera;
 	private Page page;
 	private Point lastMousePosition;
@@ -30,6 +33,14 @@ public class SheetMusicCanvas extends JPanel implements MouseWheelListener, Mous
 		addMouseWheelListener(this);
 		addMouseMotionListener(this);
 		addMouseListener(this);
+	}
+
+	public CanvasMode getCanvasMode() {
+		return mode;
+	}
+
+	public void setCanvasMode(CanvasMode mode) {
+		this.mode = mode;
 	}
 
 	public Camera getCamera() {
