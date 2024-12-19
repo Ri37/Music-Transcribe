@@ -1,14 +1,23 @@
 package gui;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 
 public class Note {
     private final int pitch; // Pitch value, e.g., 0 = Middle C, 2 = D, 4 = E, etc.
     private final String length; // "full", "half", "quarter", "8th", "16th"
+    private boolean isHovering;
 
-    public Note(int pitch, String length) {
+    public Note(int pitch, String length, boolean isHovering) {
         this.pitch = pitch;
         this.length = length;
+        this.isHovering = isHovering;
+    }
+
+    public Note(int pitch, String length) {
+        this(pitch, length, false);
     }
 
     public int getPitch() {
@@ -17,6 +26,14 @@ public class Note {
 
     public String getLength() {
         return length;
+    }
+
+    public boolean getHovering() {
+        return this.isHovering;
+    }
+
+    public void setHovering(boolean isHovering) {
+        this.isHovering = isHovering;
     }
 
     public void draw(Graphics2D g2d, int x, int y) {
@@ -72,6 +89,23 @@ public class Note {
                 g2d.drawLine(x + 20, y - 45, x + 30, y - 35);
                 g2d.drawLine(x + 20, y - 50, x + 30, y - 40);
                 break;
+        }
+
+        if (isHovering) {
+            int startX = x - 15;
+            int startY = y - 60;
+            int endX = x + 35;
+            int endY = y + 20;
+
+            Color c = g2d.getColor();
+            Stroke s = g2d.getStroke();
+
+            g2d.setColor(Color.RED);
+            g2d.setStroke(new BasicStroke(2.f));
+            g2d.drawLine(startX, startY, endX, endY);
+            g2d.drawLine(endX, startY, startX, endY);
+            g2d.setStroke(s);
+            g2d.setColor(c);
         }
     }
 }

@@ -15,7 +15,9 @@ import javax.swing.JPanel;
 import gui.Camera;
 import gui.Constants;
 import gui.Constants.CanvasMode;
+import gui.Note;
 import gui.Page;
+import gui.SheetRow;
 
 public class SheetMusicCanvas extends JPanel implements MouseWheelListener, MouseMotionListener, MouseListener {
 	private CanvasMode mode;
@@ -94,6 +96,65 @@ public class SheetMusicCanvas extends JPanel implements MouseWheelListener, Mous
 		}
 	}
 
+	private Point applyCameraTransform(Point mousePoint) {
+		double x = (mousePoint.x / camera.getZoom()) + camera.getX();
+		double y = (mousePoint.y / camera.getZoom()) + camera.getY();
+		return new Point((int)x, (int)y);
+	}
+
+	public void deleteMouseMoved(MouseEvent e) {
+		Point mousePoint = applyCameraTransform(e.getPoint());
+
+		for (SheetRow row : page.getRows()) {
+			for (int i = 0; i < row.getNotes().size(); i++) {
+				Note note = row.getNotes().get(i);
+				Point position = row.getNotePosition(note, i, getWidth());
+
+				// Hit box
+				int startX = position.x - 15;
+				int startY = position.y - 60;
+				int endX = position.x + 35;
+				int endY = position.y + 20;
+
+				if (mousePoint.x >= startX && mousePoint.x <= endX &&
+					mousePoint.y >= startY && mousePoint.y <= endY) {
+					if (!note.getHovering()) {
+						note.setHovering(true);
+					}
+				} else {
+					if (note.getHovering()) {
+						note.setHovering(false);
+					}
+				}
+			}
+		}
+		repaint();
+	}
+
+	public void deleteMouseClicked(MouseEvent e) {
+		Point mousePoint = applyCameraTransform(e.getPoint());
+
+		for (SheetRow row : page.getRows()) {
+			for (int i = 0; i < row.getNotes().size(); i++) {
+				Note note = row.getNotes().get(i);
+				Point position = row.getNotePosition(note, i, getWidth());
+
+				// Hit box
+				int startX = position.x - 15;
+				int startY = position.y - 60;
+				int endX = position.x + 35;
+				int endY = position.y + 20;
+
+				if (mousePoint.x >= startX && mousePoint.x <= endX &&
+					mousePoint.y >= startY && mousePoint.y <= endY) {
+					row.removeNote(note);
+					repaint();
+					return; // Remove only one note
+				}
+			}
+		}
+	}
+
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -139,10 +200,20 @@ public class SheetMusicCanvas extends JPanel implements MouseWheelListener, Mous
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
+		switch (this.mode) {
+			case DRAG: break;
+			case ADD: break;
+			case DELETE: deleteMouseMoved(e); break;
+		}
 	}
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
+		switch (this.mode) {
+			case DRAG: break;
+			case ADD: break;
+			case DELETE: deleteMouseClicked(e); break;
+		}
 	}
 
 	@Override
