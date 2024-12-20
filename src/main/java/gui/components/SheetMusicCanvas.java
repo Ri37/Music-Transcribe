@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import gui.Camera;
 import gui.Constants;
 import gui.Constants.CanvasMode;
+import gui.Constants.NoteType;
 import gui.Note;
 import gui.Page;
 import gui.SheetRow;
@@ -102,6 +103,10 @@ public class SheetMusicCanvas extends JPanel implements MouseWheelListener, Mous
 		return new Point((int)x, (int)y);
 	}
 
+	public void addMouseMoved(MouseEvent e) {
+
+	}
+
 	public void deleteMouseMoved(MouseEvent e) {
 		Point mousePoint = applyCameraTransform(e.getPoint());
 
@@ -118,17 +123,19 @@ public class SheetMusicCanvas extends JPanel implements MouseWheelListener, Mous
 
 				if (mousePoint.x >= startX && mousePoint.x <= endX &&
 					mousePoint.y >= startY && mousePoint.y <= endY) {
-					if (!note.getHovering()) {
-						note.setHovering(true);
+					if (note.getNoteType() != NoteType.HOVERING) {
+						note.setNoteType(NoteType.HOVERING);
 					}
 				} else {
-					if (note.getHovering()) {
-						note.setHovering(false);
-					}
+					note.setNoteType(NoteType.NONE);
 				}
 			}
 		}
 		repaint();
+	}
+
+	public void addMouseClicked(MouseEvent e) {
+
 	}
 
 	public void deleteMouseClicked(MouseEvent e) {
@@ -202,7 +209,7 @@ public class SheetMusicCanvas extends JPanel implements MouseWheelListener, Mous
 	public void mouseMoved(MouseEvent e) {
 		switch (this.mode) {
 			case DRAG: break;
-			case ADD: break;
+			case ADD: addMouseMoved(e); break;
 			case DELETE: deleteMouseMoved(e); break;
 		}
 	}
@@ -211,7 +218,7 @@ public class SheetMusicCanvas extends JPanel implements MouseWheelListener, Mous
 	public void mouseClicked(MouseEvent e) {
 		switch (this.mode) {
 			case DRAG: break;
-			case ADD: break;
+			case ADD: addMouseClicked(e); break;
 			case DELETE: deleteMouseClicked(e); break;
 		}
 	}

@@ -22,6 +22,14 @@ public class SheetRow {
         return notes;
     }
 
+    public void addNote(Note note, int index) {
+        if (index < 0 || index > notes.size()) {
+            addNote(note);
+        } else {
+            notes.add(index, note);
+        }
+    }
+
     public void addNote(Note note) {
         notes.add(note);
     }
