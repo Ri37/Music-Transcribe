@@ -9,6 +9,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.util.Iterator;
 
 import javax.swing.JPanel;
 
@@ -44,6 +45,7 @@ public class SheetMusicCanvas extends JPanel implements MouseWheelListener, Mous
 
 	public void setCanvasMode(CanvasMode mode) {
 		this.mode = mode;
+		clearBlueprintNotes();
 	}
 
 	public Camera getCamera() {
@@ -103,8 +105,44 @@ public class SheetMusicCanvas extends JPanel implements MouseWheelListener, Mous
 		return new Point((int)x, (int)y);
 	}
 
-	public void addMouseMoved(MouseEvent e) {
+	private void clearBlueprintNotes()
+	{
+		for (SheetRow row : page.getRows()) {
+			Iterator<Note> iterator = row.getNotes().iterator();
+			while (iterator.hasNext()) {
+				Note note = iterator.next();
+				if (note.getNoteType() == NoteType.BLUEPRINT) {
+					iterator.remove();
+				}
+			}
+		}
+		repaint();
+	}
 
+	public void addMouseMoved(MouseEvent e) {
+		clearBlueprintNotes();
+
+		Point mousePoint = applyCameraTransform(e.getPoint());
+		SheetRow targetRow = null;
+
+		for (SheetRow row : page.getRows()) {
+			if (mousePoint.y >= row.getStartY() && mousePoint.y < row.getStartY() + Constants.ROW_SPACING) {
+				targetRow = row;
+				break;
+			}
+		}
+
+		if (targetRow == null) {
+			return;
+		}
+
+		int noteIndex = (mousePoint.x - (getWidth() - Constants.ROW_WIDTH) / 2) / 50 - 1;
+		if (noteIndex < 0) noteIndex = 0;
+		if (noteIndex > targetRow.getNotes().size()) noteIndex = targetRow.getNotes().size();
+
+		Note blueprintNote = new Note(0, "quarter", NoteType.BLUEPRINT);
+		targetRow.addNote(blueprintNote, noteIndex);
+		repaint();
 	}
 
 	public void deleteMouseMoved(MouseEvent e) {
@@ -135,7 +173,27 @@ public class SheetMusicCanvas extends JPanel implements MouseWheelListener, Mous
 	}
 
 	public void addMouseClicked(MouseEvent e) {
+		Point mousePoint = applyCameraTransform(e.getPoint());
+		SheetRow targetRow = null;
 
+		for (SheetRow row : page.getRows()) {
+			if (mousePoint.y >= row.getStartY() && mousePoint.y < row.getStartY() + Constants.ROW_SPACING) {
+				targetRow = row;
+				break;
+			}
+		}
+
+		if (targetRow == null) {
+			return;
+		}
+
+		for (Note note : targetRow.getNotes()) {
+			if (note.getNoteType() == NoteType.BLUEPRINT) {
+				note.setNoteType(NoteType.NONE);
+				repaint();
+				return;
+			}
+		}
 	}
 
 	public void deleteMouseClicked(MouseEvent e) {
