@@ -1,32 +1,41 @@
 package audio;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.sound.sampled.UnsupportedAudioFileException;
+
+import be.tarsos.dsp.AudioEvent;
+import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 
 import gui.Note;
 import audio.FrequencyToNoteMap;
 
+import be.tarsos.dsp.AudioEvent;
+import be.tarsos.dsp.AudioProcessor;
+import java.io.File;
+import java.io.IOException;
+
 public class AmplitudeTranscriber implements Transcriber<short[]>{
 
-    static PitchProcessor.PitchEstimationAlgorithm algorithm = PitchProcessor.PitchEstimationAlgorithm.YIN;
+    static PitchProcessor.PitchEstimationAlgorithm algorithm = PitchProcessor.PitchEstimationAlgorithm.FFT_PITCH;
     static int sampleRate = 44100;
-    static int bufferSize = 1024;
-    static int overlap = 512;
-    static float bufferLengthMs = (float) bufferSize / sampleRate;
-    static float overlapMs = (float) overlap / sampleRate;
+    static int bufferSize = 512; // 12ms
+    static int overlap = 256;
 
     public record NoteSketch (
         int noteNum,
-        float startTime, 
-        float endTime,
-        int pitchIndex
+        int startIndex, 
+        int endIndex
     ){
         //DEBUG
         @Override
         public String toString() {
-            return "Note: " + noteNum + "\nStart Time: " + startTime + "\nEnd Time: " + endTime + "\nPitchindex: " + pitchIndex; 
+            return "Note: " + noteNum + "\nStart Index: " + startIndex + "\nEnd Index: " + endIndex; 
+            // return "Note: " + noteNum;
         }
     }
 
@@ -38,7 +47,6 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
         float[] scaledSamples = new float[samples.length];
         for (int i = 0; i < samples.length; i++) {
             scaledSamples[i] = ((float) samples[i] / Short.MAX_VALUE);
-            System.out.println(scaledSamples[i]);
         }
 
         // Convert ampitudes to pitches from 23ms long buffers with 50% overlap
@@ -51,6 +59,8 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
             PitchDetectionResult result = algorithm.getDetector(sampleRate, samplePiece.length).getPitch(samplePiece);
             pitches[pitchIndex] = result.getPitch();
             pitchIndex++;
+
+            System.out.println(result.getPitch());
         }
 
         // Convert remaining smaller-than-buffer sized part, if its presetn
@@ -62,14 +72,7 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
             PitchDetectionResult result = algorithm.getDetector(sampleRate, samplePiece.length).getPitch(samplePiece);
             pitches[pitches.length - 1] = result.getPitch();
         } 
-        
-        //DEBUG:
-        for(float pitch : pitches) {
-            System.out.println(pitch);
-        }
-        ////////////////
-
-
+    
         // Hertz to notes with length
         // (every pitch element other then the last represents a 23ms piece's pitch, with a 23/2 offset,
         // last does for a (full length - iterator) / 44.100)ms piece)
@@ -86,9 +89,10 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
         }
 
         if (firstNotePitch != null) {
+            System.err.println("First note index: " + firstNoteInd);
+
             NoteSketch firstNoteSketch = new NoteSketch(firstNotePitch.intValue(), 
-                firstNoteInd * (bufferLengthMs - overlapMs), firstNoteInd * (bufferLengthMs - overlapMs) + bufferLengthMs,
-                firstNoteInd);
+                firstNoteInd, firstNoteInd);
             notesAndTimes.add(firstNoteSketch);
 
             //last buffer shorter, later?
@@ -100,57 +104,148 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
 
                 NoteSketch previousNoteSketch = notesAndTimes.get(notesAndTimes.size()-1);
                 // if the directly previous pitch was the same, just lengthen it
-                if ( previousNoteSketch.pitchIndex == i - 1 && previousNoteSketch.noteNum == currentNote.intValue()) {
-                    // lengthen prev sound 
-                    NoteSketch newValue = new NoteSketch(currentNote.intValue(), previousNoteSketch.startTime, 
-                        previousNoteSketch.endTime + bufferLengthMs, i);
+                // i-3 (-1 for errors) because of 50% overlap (should be calculated by buffer / overlap rate, but idc rn)
+                if (previousNoteSketch.endIndex == i - 1 && previousNoteSketch.noteNum == currentNote.intValue()) {
+                    // lengthen prev sound
+                    NoteSketch newValue = new NoteSketch(currentNote.intValue(), previousNoteSketch.startIndex, 
+                        previousNoteSketch.endIndex + 1);
                     notesAndTimes.set(notesAndTimes.size()-1, newValue);
                 }
                 // add new sound to list 
                 else {
-                    NoteSketch newNote = new NoteSketch(currentNote.intValue(), i * (bufferLengthMs - overlapMs), 
-                        i * (bufferLengthMs - overlapMs) + bufferLengthMs, i);
+                    float startTime = (i * (bufferSize - overlap)) / (float) sampleRate;
+                    float endTime = startTime + (bufferSize / (float) sampleRate);
+
+                    NoteSketch newNote = new NoteSketch(currentNote.intValue(), i, i);
                     notesAndTimes.add(newNote);
                 }
             }
         }
 
-        //DEBUG
-        for (NoteSketch n : notesAndTimes) {
-            System.err.println(n);
+        //lets take out 1/2 buffer long sounds, probably fails
+        for (int i = 0; i < notesAndTimes.size(); i++) {
+            if (notesAndTimes.get(i).endIndex - notesAndTimes.get(i).startIndex  < 2) {
+                notesAndTimes.remove(i);
+                System.out.println("removed some shi");
+            }
         }
 
-        //valamiért megduplázódik a hossz
+        //DEBUG
+        for (int i = 0; i < Math.min(100, notesAndTimes.size() - 1); i++) {
+            System.err.println(notesAndTimes.get(i));
+        }
+        System.err.println("Note count: " + notesAndTimes.size());
+
         //create Note list
+        Note[] retVal = new Note[notesAndTimes.size()];
+        for (int i = 0; i < notesAndTimes.size(); i++) {
+            Note note = new Note(notesAndTimes.get(i).noteNum, "8th"); //%20 for debug
+            retVal[i] = note;
+        }
 
-
-        return new Note[0];
+        return retVal;
     }
 
     //DEBUG:
     private static short[] generateTestSignal() {
         int sampleRate = 44100; // 44.1 kHz
         double frequency = 440.0; // A4 pitch
-        int durationSeconds = 1; // 2 seconds
+        int durationSeconds = 3; // 3 seconds
         int totalSamples = sampleRate * durationSeconds;
     
         short[] signal = new short[totalSamples];
         double amplitude = 32767; // Maximum amplitude for short
     
-        for (int i = 0; i < totalSamples; i++) {
+        for (int i = 0; i < totalSamples / 3; i++) {
             // Generate sine wave signal
             signal[i] = (short) (amplitude * Math.sin(2 * Math.PI * frequency * i / sampleRate));
         }
+        for (int i = totalSamples / 3 + 1; i < totalSamples / 3 + 44100; i++) {
+            // Generate sine wave signal
+            signal[i] = (short) 0;
+        }
+        for (int i = totalSamples / 3 + 44101; i < totalSamples; i++) {
+            // Generate sine wave signal
+            signal[i] = (short) (amplitude * Math.sin(2 * Math.PI * frequency * (740. / 440.) * i / sampleRate));
+        }
+        
+        System.out.println("SIgnals length: " + signal.length);
     
         return signal;
     }
     
 
     public static void main(String[] args) {
+        /* 
         short[] testSignal = generateTestSignal();
+        System.out.println("TestSignal legnth: " + testSignal.length);
         // for (short signal : testSignal) {System.err.println(signal);}
         AmplitudeTranscriber a = new AmplitudeTranscriber();
         a.transcribe(testSignal);
+        */
+
+        String filePath = "C:/Users/rajcs/Downloads/fürelise.wav"; // Replace with your MP3 file path
+
+        try 
+        {
+            short[] amplitudes = loadAmplitudesFromMP3(filePath);
+            //short[] amplitudes = generateTestSignal();
+            System.out.println("Loaded amplitudes array of size: " + amplitudes.length);
+
+            for (short a : amplitudes) {
+                // System.err.println(a);
+            }
+
+            AmplitudeTranscriber a = new AmplitudeTranscriber();
+            a.transcribe(amplitudes);
+        }
+          
+        catch (IOException | UnsupportedAudioFileException e) {
+            e.printStackTrace();
+        }
+
     }
-    ////////////////////
+
+        public static short[] loadAmplitudesFromMP3(String filePath) throws IOException, UnsupportedAudioFileException {
+        File mp3File = new File(filePath);
+        System.err.println("asd");
+
+        // Convert MP3 to raw audio
+        var dispatcher = AudioDispatcherFactory.fromFile(mp3File, 1024, 0);
+        System.err.println("asd2");
+
+        // Store amplitude data
+        ArrayList<Short> amplitudeList = new ArrayList<>();
+
+        // Add a processor to read amplitudes from the audio stream
+        dispatcher.addAudioProcessor(new AudioProcessor() {
+            @Override
+            public boolean process(AudioEvent audioEvent) {
+                float[] floatBuffer = audioEvent.getFloatBuffer(); // Normalized amplitudes (-1 to 1)
+                for (float sample : floatBuffer) {
+                    // Convert normalized float (-1 to 1) to short (-32768 to 32767)
+                    amplitudeList.add((short) (sample * Short.MAX_VALUE));
+                }
+                return true;
+            }
+
+            @Override
+            public void processingFinished() {
+                // Processing complete
+            }
+        });
+
+        // Run the dispatcher (blocking operation)
+        dispatcher.run();
+
+        // Convert ArrayList to short[]
+        short[] amplitudes = new short[amplitudeList.size()];
+        for (int i = 0; i < amplitudeList.size(); i++) {
+            amplitudes[i] = amplitudeList.get(i);
+        }
+
+        return amplitudes;
+    }
 }
+    ////////////////////
+

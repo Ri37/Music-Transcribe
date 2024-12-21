@@ -5,7 +5,7 @@ import gui.Note;
 import gui.Page;
 import gui.SheetRow;
 import gui.components.SheetMusicCanvas;
-
+import audio.AmplitudeTranscriber;
 import audio.AudioProcessor;
 import audio.AudioSampler;
 import audio.Transcriber;
@@ -66,7 +66,7 @@ public class OpenAudioAction extends AbstractAction {
 			audioProcessor.close();
 
 			// AI transcribe logic returns the Notes
-			Transcriber<short[]> transcriber = new DummyTranscriber();
+			Transcriber<short[]> transcriber = new AmplitudeTranscriber();
 			Note[] notes = transcriber.transcribe(samples);
 
 			// Place Notes
