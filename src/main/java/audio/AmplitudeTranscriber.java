@@ -26,6 +26,9 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
     static int bufferSize = 512; // 12ms
     static int overlap = 256;
 
+    // For some reason notes still not get conneceted, while they are in the threshold.... 
+    static int quietThreshold = 100; // > 1
+
     public record NoteSketch (
         int noteNum,
         int startIndex, 
@@ -105,7 +108,7 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
                 NoteSketch previousNoteSketch = notesAndTimes.get(notesAndTimes.size()-1);
                 // if the directly previous pitch was the same, just lengthen it
                 // i-3 (-1 for errors) because of 50% overlap (should be calculated by buffer / overlap rate, but idc rn)
-                if (previousNoteSketch.endIndex == i - 1 && previousNoteSketch.noteNum == currentNote.intValue()) {
+                if (previousNoteSketch.endIndex > i - quietThreshold && previousNoteSketch.noteNum == currentNote.intValue()) {
                     // lengthen prev sound
                     NoteSketch newValue = new NoteSketch(currentNote.intValue(), previousNoteSketch.startIndex, 
                         previousNoteSketch.endIndex + 1);
@@ -125,8 +128,11 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
         //lets take out 1/2 buffer long sounds, probably fails
         for (int i = 0; i < notesAndTimes.size(); i++) {
             if (notesAndTimes.get(i).endIndex - notesAndTimes.get(i).startIndex  < 2) {
+                System.out.println("Removed: \n" + notesAndTimes.get(i));
                 notesAndTimes.remove(i);
-                System.out.println("removed some shi");
+            }
+            else {
+                System.out.println("Did not remove: \n" + notesAndTimes.get(i));
             }
         }
 
