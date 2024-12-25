@@ -84,10 +84,7 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
         ArrayList<NoteSketch> notesAndTimes = new ArrayList<>();
         int firstNoteInd = 0;
         Integer firstNotePitch = FrequencyToNoteMap.getNoteFromFrequency(pitches[firstNoteInd]);
-        while(firstNotePitch == null) {
-            if (firstNoteInd == pitches.length) {
-                break;
-            }
+        while(firstNotePitch == null && firstNoteInd < pitches.length) {
             firstNotePitch =  FrequencyToNoteMap.getNoteFromFrequency(pitches[firstNoteInd++]);
         }
 
@@ -108,10 +105,10 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
                 NoteSketch previousNoteSketch = notesAndTimes.get(notesAndTimes.size()-1);
                 // if the directly previous pitch was the same, just lengthen it
                 // i-3 (-1 for errors) because of 50% overlap (should be calculated by buffer / overlap rate, but idc rn)
-                if (previousNoteSketch.endIndex > i - quietThreshold && previousNoteSketch.noteNum == currentNote.intValue()) {
+                if (previousNoteSketch.endIndex >= i - quietThreshold && previousNoteSketch.noteNum == currentNote.intValue()) {
                     // lengthen prev sound
                     NoteSketch newValue = new NoteSketch(currentNote.intValue(), previousNoteSketch.startIndex, 
-                        previousNoteSketch.endIndex + 1);
+                        i);
                     notesAndTimes.set(notesAndTimes.size()-1, newValue);
                 }
                 // add new sound to list 
@@ -127,12 +124,10 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
 
         //lets take out 1/2 buffer long sounds, probably fails
         for (int i = 0; i < notesAndTimes.size(); i++) {
-            if (notesAndTimes.get(i).endIndex - notesAndTimes.get(i).startIndex  < 2) {
+            if (notesAndTimes.get(i).endIndex - notesAndTimes.get(i).startIndex  <= 2) {
                 System.out.println("Removed: \n" + notesAndTimes.get(i));
                 notesAndTimes.remove(i);
-            }
-            else {
-                System.out.println("Did not remove: \n" + notesAndTimes.get(i));
+                i--;
             }
         }
 
