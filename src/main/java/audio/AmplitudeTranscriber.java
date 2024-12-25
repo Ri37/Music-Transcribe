@@ -21,13 +21,14 @@ import java.io.IOException;
 
 public class AmplitudeTranscriber implements Transcriber<short[]>{
 
-    static PitchProcessor.PitchEstimationAlgorithm algorithm = PitchProcessor.PitchEstimationAlgorithm.FFT_PITCH;
-    static int sampleRate = 44100;
-    static int bufferSize = 512; // 12ms
-    static int overlap = 256;
+    static final PitchProcessor.PitchEstimationAlgorithm algorithm = PitchProcessor.PitchEstimationAlgorithm.FFT_PITCH;
+    static final int sampleRate = 44100;
+    static final int bufferSize = 512; // 12ms
+    static final int overlap = 256;
 
     // For some reason notes still not get conneceted, while they are in the threshold.... 
-    static int quietThreshold = 100; // > 1
+    static final int quietThreshold = 2; // > 1
+    static final int noteLengthTreshold = 15;
 
     public record NoteSketch (
         int noteNum,
@@ -63,8 +64,16 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
             pitches[pitchIndex] = result.getPitch();
             pitchIndex++;
 
-            System.out.println(result.getPitch());
+            // System.out.println(result.getPitch());
         }
+
+        String debugstuff = "";
+        int debugcounter = 0;
+        for (float p : pitches) {
+            debugstuff = debugstuff + ", " + debugcounter + ".: " + p;
+            debugcounter++;
+        }
+        System.out.println(debugstuff);
 
         // Convert remaining smaller-than-buffer sized part, if its presetn
         
@@ -123,16 +132,22 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
         }
 
         //lets take out 1/2 buffer long sounds, probably fails
+        // or should i connect them
+        
+        int oneslashtwolengthnotes = 0;
         for (int i = 0; i < notesAndTimes.size(); i++) {
-            if (notesAndTimes.get(i).endIndex - notesAndTimes.get(i).startIndex  <= 2) {
-                System.out.println("Removed: \n" + notesAndTimes.get(i));
+            if (notesAndTimes.get(i).endIndex - notesAndTimes.get(i).startIndex  <= noteLengthTreshold) {
                 notesAndTimes.remove(i);
                 i--;
+                oneslashtwolengthnotes++;
             }
         }
+        System.out.println("One/two length notes count: " + oneslashtwolengthnotes);
+        
+        
 
         //DEBUG
-        for (int i = 0; i < Math.min(100, notesAndTimes.size() - 1); i++) {
+        for (int i = 0; i < Math.min(200, notesAndTimes.size() - 1); i++) {
             System.err.println(notesAndTimes.get(i));
         }
         System.err.println("Note count: " + notesAndTimes.size());
@@ -185,7 +200,7 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
         a.transcribe(testSignal);
         */
 
-        String filePath = "C:/Users/rajcs/Downloads/fürelise.wav"; // Replace with your MP3 file path
+        String filePath = "C:/Users/rajcs/Downloads/ms (1).wav"; // Replace with your MP3 file path
 
         try 
         {
