@@ -23,6 +23,7 @@ import gui.SheetRow;
 
 public class SheetMusicCanvas extends JPanel implements MouseWheelListener, MouseMotionListener, MouseListener {
 	private CanvasMode mode;
+	private int blueprintPitch;
 
 	private final Camera camera;
 	private Page page;
@@ -140,7 +141,7 @@ public class SheetMusicCanvas extends JPanel implements MouseWheelListener, Mous
 		if (noteIndex < 0) noteIndex = 0;
 		if (noteIndex > targetRow.getNotes().size()) noteIndex = targetRow.getNotes().size();
 
-		Note blueprintNote = new Note(0, "quarter", NoteType.BLUEPRINT);
+		Note blueprintNote = new Note(this.blueprintPitch, "quarter", NoteType.BLUEPRINT);
 		targetRow.addNote(blueprintNote, noteIndex);
 		repaint();
 	}
@@ -220,6 +221,18 @@ public class SheetMusicCanvas extends JPanel implements MouseWheelListener, Mous
 		}
 	}
 
+	public void dragMouseWheelMoved(MouseWheelEvent e) {
+		int mouseX = e.getX();
+		int mouseY = e.getY();
+		double zoomDelta = -e.getPreciseWheelRotation() * 0.1;
+		zoom(zoomDelta, mouseX, mouseY);
+	}
+
+	public void addMouseWheelMoved(MouseWheelEvent e) {
+		this.blueprintPitch += -e.getWheelRotation();
+		addMouseMoved(e);
+	}
+
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -236,10 +249,11 @@ public class SheetMusicCanvas extends JPanel implements MouseWheelListener, Mous
 
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
-		int mouseX = e.getX();
-		int mouseY = e.getY();
-		double zoomDelta = -e.getPreciseWheelRotation() * 0.1;
-		zoom(zoomDelta, mouseX, mouseY);
+		switch (this.mode) {
+			case DRAG: dragMouseWheelMoved(e); break;
+			case ADD: addMouseWheelMoved(e); break;
+			case DELETE: break;
+		}
 	}
 
 	@Override
