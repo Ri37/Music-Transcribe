@@ -10,8 +10,12 @@ import gui.components.menubar.MenuBar;
 public class MainFrame extends JFrame{
 	private SheetMusicCanvas canvas;
 	private ControlPanel controlPanel;
-	private MenuBar menuBar;
+	private MenuBar menuBar;	
 	
+	public SheetMusicCanvas getCanvas() {
+		return canvas;
+	}
+
 	public MainFrame() {
 		super("Sheet Music Maker");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

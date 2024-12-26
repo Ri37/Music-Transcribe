@@ -4,6 +4,7 @@ import gui.Constants;
 import gui.Note;
 import gui.Page;
 import gui.SheetRow;
+import gui.components.MainFrame;
 import gui.components.SheetMusicCanvas;
 
 import audio.AudioProcessor;
@@ -26,14 +27,12 @@ import javax.swing.JFrame;
 
 public class OpenAudioAction extends AbstractAction {
 
-	private final JFrame frame;
-	private final SheetMusicCanvas canvas;
+	private final MainFrame frame;
 
-	public OpenAudioAction(JFrame frame, SheetMusicCanvas canvas) {
+	public OpenAudioAction(MainFrame frame) {
 		super("Read audio");
 
 		this.frame = frame;
-		this.canvas = canvas;
 	}
 
 	@Override
@@ -86,7 +85,7 @@ public class OpenAudioAction extends AbstractAction {
 			}
 
 			Page page = new Page(rows);
-			canvas.setPage(page);
+			frame.getCanvas().setPage(page);
 		}
 	}
 

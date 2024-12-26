@@ -25,6 +25,10 @@ public class Note {
     public int getPitch() {
         return pitch;
     }
+    
+    public int getMidiPitch() {
+    	return pitch + 60;
+    }
 
     public String getLength() {
         return length;
@@ -114,5 +118,16 @@ public class Note {
 
         g2d.setStroke(originalStroke);
         g2d.setColor(originalColor);
+    }
+    
+    public int getTick() { //PPQ 24 mellett
+    	return switch (length) {
+		case "full" -> 96;
+        case "half" -> 48;
+        case "quarter" -> 24;
+        case "8th" -> 12;
+        case "16th" -> 6;
+		default -> throw new IllegalArgumentException("Unexpected value: " + length);
+		};
     }
 }
