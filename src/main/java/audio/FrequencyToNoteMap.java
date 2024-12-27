@@ -55,7 +55,7 @@ public class FrequencyToNoteMap {
 
     public static Integer getNoteFromFrequency(double freq) {
         for (Map.Entry<Double, Integer> entry : pitchToNoteMap.entrySet()) {
-            if (Math.abs(entry.getKey() - freq) < 6 && entry.getValue() > -3 && entry.getValue() < /*13*/ 24) { // Allow small tolerance
+            if (Math.abs(entry.getKey() - freq) < 5 && entry.getValue() > -5 && entry.getValue() < 24) { // Allow small tolerance
                 return entry.getValue();
             }
         }

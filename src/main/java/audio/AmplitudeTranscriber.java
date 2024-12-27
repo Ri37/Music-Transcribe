@@ -27,7 +27,7 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
     static final int overlap = 256;
 
     // For some reason notes still not get conneceted, while they are in the threshold.... 
-    static final int quietThreshold = 2; // > 1
+    static final int quietThreshold = 6;
     static final int noteLengthTreshold = 15;
 
     public record NoteSketch (
@@ -70,6 +70,7 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
         String debugstuff = "";
         int debugcounter = 0;
         for (float p : pitches) {
+            if (debugcounter > 3000) {break;}
             debugstuff = debugstuff + ", " + debugcounter + ".: " + p;
             debugcounter++;
         }
@@ -136,13 +137,13 @@ public class AmplitudeTranscriber implements Transcriber<short[]>{
         
         int oneslashtwolengthnotes = 0;
         for (int i = 0; i < notesAndTimes.size(); i++) {
-            if (notesAndTimes.get(i).endIndex - notesAndTimes.get(i).startIndex  <= noteLengthTreshold) {
+            if (notesAndTimes.get(i).endIndex - notesAndTimes.get(i).startIndex  < noteLengthTreshold) {
                 notesAndTimes.remove(i);
                 i--;
                 oneslashtwolengthnotes++;
             }
         }
-        System.out.println("One/two length notes count: " + oneslashtwolengthnotes);
+        System.out.println("Too short notes count: " + oneslashtwolengthnotes);
         
         
 
