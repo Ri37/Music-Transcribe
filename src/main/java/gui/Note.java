@@ -29,6 +29,7 @@ public class Note {
         this.length = length;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.noteType = NoteType.NONE;
     }
 
     public int getPitch() {
