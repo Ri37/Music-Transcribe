@@ -5,10 +5,19 @@ import java.awt.Graphics2D;
 public class Note {
     private final int pitch; // Pitch value, e.g., 0 = Middle C, 2 = D, 4 = E, etc.
     private final String length; // "full", "half", "quarter", "8th", "16th"
+    private float startTime = 0; //in seconds
+    private float endTime = 0; //in seconds
 
     public Note(int pitch, String length) {
         this.pitch = pitch;
         this.length = length;
+    }
+
+    public Note(int pitch, String length, float startTime, float endTime) {
+        this.pitch = pitch;
+        this.length = length;
+        this.startTime = startTime;
+        this.endTime = endTime;
     }
 
     public int getPitch() {

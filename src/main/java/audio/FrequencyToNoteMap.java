@@ -55,11 +55,12 @@ public class FrequencyToNoteMap {
 
     public static Integer getNoteFromFrequency(double freq) {
         for (Map.Entry<Double, Integer> entry : pitchToNoteMap.entrySet()) {
-            if (Math.abs(entry.getKey() - freq) < 5 && entry.getValue() > -5 && entry.getValue() < 24) { // Allow small tolerance
+            // in MVP only for treble clef + small tolerance
+            if (Math.abs(entry.getKey() - freq) < 5 && entry.getValue() > -5 && entry.getValue() < 24) {
                 return entry.getValue();
             }
         }
         
-        return null; // No match found
+        return null;
     }
 }
