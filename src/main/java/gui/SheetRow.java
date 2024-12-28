@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,8 +22,31 @@ public class SheetRow {
         return notes;
     }
 
+    public void addNote(Note note, int index) {
+        if (index < 0 || index > notes.size()) {
+            addNote(note);
+        } else {
+            notes.add(index, note);
+        }
+    }
+
     public void addNote(Note note) {
         notes.add(note);
+    }
+
+    public void removeNote(Note note) {
+        notes.remove(note);
+    }
+
+    public Point getNotePosition(Note note, int noteIndex, int canvasWidth) {
+        int xOffset = (canvasWidth - Constants.ROW_WIDTH) / 2;
+        int noteX = xOffset + 50 + (noteIndex * 50);
+
+        double middleCPitch = 10.0;
+        double offset = (middleCPitch - note.getPitch()) * Constants.LINE_SPACING / 2.0;
+        int noteY = (int) (startY + offset);
+
+        return new Point(noteX, noteY);
     }
 
     public void draw(Graphics2D g2d, int canvasWidth) {
@@ -33,15 +57,10 @@ public class SheetRow {
             g2d.drawLine(xOffset, y, xOffset + Constants.ROW_WIDTH, y);
         }
 
-        double middleCPitch = 10.0;
-
-        int noteX = xOffset + 50;
-        for (Note note : notes) {
-            double offset = (middleCPitch - note.getPitch()) * Constants.LINE_SPACING / 2.0;
-            int noteY = (int) (startY + offset);
-
-            note.draw(g2d, noteX, noteY);
-            noteX += 50;
+        for (int i = 0; i < notes.size(); i++) {
+            Note note = notes.get(i);
+            Point notePosition = getNotePosition(note, i, canvasWidth);
+            note.draw(g2d, notePosition.x, notePosition.y);
         }
     }
 }

@@ -11,16 +11,20 @@ import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 
 import gui.Constants;
+import gui.Constants.CanvasMode;
 
 public class ControlPanel extends JPanel {
     private final SheetMusicCanvas canvas;
     private final JFrame frame;
     private final List<JButton> buttons = new ArrayList<>();
+    private final ButtonGroup toggleGroup = new ButtonGroup();
 
     public ControlPanel(SheetMusicCanvas canvas, JFrame frame) {
         this.canvas = canvas;
@@ -38,6 +42,14 @@ public class ControlPanel extends JPanel {
             canvas.repaint();
         });
         addButton("Add Row", e -> canvas.addRow());
+
+        add(Box.createVerticalGlue());
+
+        addToggleButton(toggleGroup, "View", e -> canvas.setCanvasMode(CanvasMode.DRAG), true);
+        addToggleButton(toggleGroup, "Add Note", e -> canvas.setCanvasMode(CanvasMode.ADD), false);
+        addToggleButton(toggleGroup, "Remove Note", e -> canvas.setCanvasMode(CanvasMode.DELETE), false);
+
+        add(Box.createRigidArea(new Dimension(0, 10)));
 
         frame.addComponentListener(new ComponentAdapter() {
             @Override
@@ -61,6 +73,13 @@ public class ControlPanel extends JPanel {
             button.setPreferredSize(new Dimension(newWidth - 20, 40));
         }
 
+        toggleGroup.getElements().asIterator().forEachRemaining(abstractButton -> {
+            if (abstractButton instanceof JToggleButton toggleButton) {
+                toggleButton.setMaximumSize(new Dimension(newWidth - 20, 40));
+                toggleButton.setPreferredSize(new Dimension(newWidth - 20, 40));
+            }
+        });
+
         canvas.setMenuBarWidth(newWidth);
 
         revalidate();
@@ -82,5 +101,26 @@ public class ControlPanel extends JPanel {
         buttons.add(button);
         add(Box.createRigidArea(new Dimension(0, 10)));
         add(button);
+    }
+
+    private void addToggleButton(ButtonGroup group, String label, ActionListener action, boolean activate) {
+        JToggleButton toggleButton = new JToggleButton(label);
+        toggleButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        toggleButton.addActionListener(action);
+
+        int initialWidth = (frame.getWidth() > Constants.MENU_BAR_THRESHOLD)
+                ? (int) (frame.getWidth() * Constants.MENU_BAR_PERCENTAGE)
+                : (int) (Constants.MENU_BAR_THRESHOLD * Constants.MENU_BAR_PERCENTAGE);
+
+        toggleButton.setMaximumSize(new Dimension(initialWidth - 20, 40));
+        toggleButton.setPreferredSize(new Dimension(initialWidth - 20, 40));
+
+        group.add(toggleButton);
+        add(Box.createRigidArea(new Dimension(0, 10)));
+        add(toggleButton);
+
+        if (activate) {
+            toggleButton.doClick();
+        }
     }
 }
