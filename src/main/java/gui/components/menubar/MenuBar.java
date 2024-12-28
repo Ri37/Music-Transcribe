@@ -29,7 +29,7 @@ public class MenuBar extends JMenuBar {
 
 
 		fileMenu = new JMenu("File");
-		newSheetMenuItem = new JMenuItem(new NewSheetAction());
+		newSheetMenuItem = new JMenuItem(new NewSheetAction(this.frame));
 		saveSheetMenuItem = new JMenuItem(new SaveSheetAction(this.frame));
 		openAudioMenuItem = new JMenuItem(new OpenAudioAction(this.frame));
 		infoMenuItem = new JMenuItem(new ShowInformationAction(this.frame));

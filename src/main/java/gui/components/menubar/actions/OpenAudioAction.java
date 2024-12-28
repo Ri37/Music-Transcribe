@@ -64,7 +64,7 @@ public class OpenAudioAction extends AbstractAction {
 
 			audioProcessor.close();
 
-			// AI transcribe logic returns the Notes
+			// Transcribe logic returns the Notes
 			Transcriber<short[]> transcriber = new AmplitudeTranscriber();
 			Note[] notes = transcriber.transcribe(samples);
 
