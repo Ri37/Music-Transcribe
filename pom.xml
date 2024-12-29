@@ -9,6 +9,24 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.4.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<createDependencyReducedPom>true</createDependencyReducedPom>
+							<relocations>
+							</relocations>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
 				<configuration>
@@ -34,13 +52,13 @@
 			</plugin>
 		</plugins>
 	</build>
-  <repositories>
-    <repository>
-      <id>be.0110.repo-releases</id>
-      <name>0110.be repository</name>
-      <url>https://mvn.0110.be/releases</url>
-    </repository>
-  </repositories>
+	<repositories>
+		<repository>
+			<id>be.0110.repo-releases</id>
+			<name>0110.be repository</name>
+			<url>https://mvn.0110.be/releases</url>
+		</repository>
+	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>org.bytedeco</groupId>
@@ -53,16 +71,16 @@
 			<version>5.11.3</version>
 			<scope>test</scope>
 		</dependency>
-    <dependency>
-      <groupId>be.tarsos.dsp</groupId>
-      <artifactId>core</artifactId>
-      <version>2.5</version>
-    </dependency>
-    <dependency>
-      <groupId>be.tarsos.dsp</groupId>
-      <artifactId>jvm</artifactId>
-      <version>2.5</version>
-    </dependency>
+		<dependency>
+			<groupId>be.tarsos.dsp</groupId>
+			<artifactId>core</artifactId>
+			<version>2.5</version>
+		</dependency>
+		<dependency>
+			<groupId>be.tarsos.dsp</groupId>
+			<artifactId>jvm</artifactId>
+			<version>2.5</version>
+		</dependency>
 		<dependency>
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
