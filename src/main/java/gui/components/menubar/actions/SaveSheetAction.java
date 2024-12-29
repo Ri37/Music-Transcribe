@@ -2,8 +2,10 @@ package gui.components.menubar.actions;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.List;
 
 import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiEvent;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.Sequence;
@@ -40,10 +42,13 @@ public class SaveSheetAction extends AbstractAction {
             // 2. Track hozzáadása
             Track track = sequence.createTrack();
 
+            addTempo(track, 60);
+
             // 3. Hangjegyek hozzáadása
             int tick = 0;
+            List<Integer> tmp = owner.getCanvas().getPage().getRows().stream().flatMap(row -> row.getNotes().stream()).map(note -> note.getMidiPitch()).toList();
             for(SheetRow row : owner.getCanvas().getPage().getRows()) {
-            	tick += saveRow(row, track, tick);
+            	tick = saveRow(row, track, tick);
             }
 //            owner.getCanvas().getPage().getRows().stream().forEach(row -> saveRow(row, track));
 
@@ -53,6 +58,28 @@ public class SaveSheetAction extends AbstractAction {
             exception.printStackTrace();
         }
 	}
+
+    private void addTempo(Track track, int bpm) {
+        // Convert BPM to microseconds per quarter note
+        int tempoInMicroseconds = 60000000 / bpm;
+
+        byte[] tempoData = {
+            (byte) ((tempoInMicroseconds >> 16) & 0xFF),
+            (byte) ((tempoInMicroseconds >> 8) & 0xFF),
+            (byte) (tempoInMicroseconds & 0xFF)
+        };
+
+        try {
+            // Create MetaMessage for Set Tempo
+            MetaMessage tempoMessage = new MetaMessage();
+            tempoMessage.setMessage(0x51, tempoData, 3);
+
+            // Add MetaMessage to Track at tick 0
+            track.add(new MidiEvent(tempoMessage, 0));
+        } catch (InvalidMidiDataException e) {
+            e.printStackTrace();
+        }
+    }    
 	
 	private String chooseOutput() {
 		// Létrehozunk egy JFileChooser-t
