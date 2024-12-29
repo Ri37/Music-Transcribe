@@ -41,7 +41,11 @@ public class SaveSheetAction extends AbstractAction {
             Track track = sequence.createTrack();
 
             // 3. Hangjegyek hozzáadása
-            owner.getCanvas().getPage().getRows().stream().forEach(row -> saveRow(row, track));
+            int tick = 0;
+            for(SheetRow row : owner.getCanvas().getPage().getRows()) {
+            	tick += saveRow(row, track, tick);
+            }
+//            owner.getCanvas().getPage().getRows().stream().forEach(row -> saveRow(row, track));
 
             // 4. MIDI fájl mentése
             MidiSystem.write(sequence, 1, new java.io.File(outputFileName));
@@ -104,8 +108,7 @@ public class SaveSheetAction extends AbstractAction {
         return null;
 	}
 	
-	private void saveRow(SheetRow row, Track track) {
-		int tick = 0;
+	private int saveRow(SheetRow row, Track track, int tick) {
 		for(Note note : row.getNotes()) {
 			try {
 				ShortMessage noteOn = new ShortMessage();
@@ -120,6 +123,8 @@ public class SaveSheetAction extends AbstractAction {
 			}
 			tick+=note.getTick();			
 		}
+		
+		return tick;
 	}
 
 }
