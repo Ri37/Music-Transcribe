@@ -24,6 +24,7 @@ import gui.SheetRow;
 public class SheetMusicCanvas extends JPanel implements MouseWheelListener, MouseMotionListener, MouseListener {
 	private CanvasMode mode;
 	private int blueprintPitch;
+	private String blueprintLength;
 
 	private final Camera camera;
 	private Page page;
@@ -31,6 +32,8 @@ public class SheetMusicCanvas extends JPanel implements MouseWheelListener, Mous
 	private int menuBarWidth;
 
 	public SheetMusicCanvas() {
+		this.blueprintPitch = 0;
+		this.blueprintLength = "quarter";
 		this.page = Page.createBociBociPage();
 		this.camera = new Camera();
 		setBackground(Color.WHITE);
@@ -141,7 +144,7 @@ public class SheetMusicCanvas extends JPanel implements MouseWheelListener, Mous
 		if (noteIndex < 0) noteIndex = 0;
 		if (noteIndex > targetRow.getNotes().size()) noteIndex = targetRow.getNotes().size();
 
-		Note blueprintNote = new Note(this.blueprintPitch, "quarter", NoteType.BLUEPRINT);
+		Note blueprintNote = new Note(this.blueprintPitch, this.blueprintLength, NoteType.BLUEPRINT);
 		targetRow.addNote(blueprintNote, noteIndex);
 		repaint();
 	}
@@ -174,6 +177,19 @@ public class SheetMusicCanvas extends JPanel implements MouseWheelListener, Mous
 	}
 
 	public void addMouseClicked(MouseEvent e) {
+		if (e.getButton() == MouseEvent.BUTTON3) {
+			switch (this.blueprintLength) {
+				case "quarter": this.blueprintLength = "8th"; break;
+				case "8th": this.blueprintLength = "16th"; break;
+				case "16th": this.blueprintLength = "full"; break;
+				case "full": this.blueprintLength = "half"; break;
+				case "half": this.blueprintLength = "quarter"; break;
+				default: this.blueprintLength = "quarter"; break;
+			}
+			addMouseMoved(e);
+			return;
+		}
+
 		Point mousePoint = applyCameraTransform(e.getPoint());
 		SheetRow targetRow = null;
 
