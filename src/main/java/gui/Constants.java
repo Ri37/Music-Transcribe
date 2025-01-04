@@ -26,4 +26,5 @@ public class Constants {
     public static final double ZOOM_MAX = 3.0;
 
     public static final int NOTES_PER_ROW = 16;
+    public static final int[] HALF_NOTE_REMAINDERS = {1, 3, 6, 8, 10};
 }

@@ -60,7 +60,13 @@ public class Note {
 
         Color originalColor = g2d.getColor();
         Stroke originalStroke = g2d.getStroke();
-
+        
+        for (int r : Constants.HALF_NOTE_REMAINDERS) {
+            if (Math.abs(pitch) % 12 == r) {
+                g2d.drawString("#", x - 10, y);
+            }
+        }
+    
         if (pitch > topLinePitch || pitch < bottomLinePitch) {
             ledgerY = y;
             if (pitch % 2 != 0) {
@@ -71,7 +77,7 @@ public class Note {
                     ledgerY = y + staffSpacing;
                 }
             }
-            
+
             if (pitch > topLinePitch) {
                 for (int currentPitch = topLinePitch + 2; currentPitch <= pitch; currentPitch += 2) {
                     g2d.drawLine(x - 10, ledgerY, x + 30, ledgerY);
