@@ -46,13 +46,14 @@ public class SheetRow {
         double offset = (middleCPitch - note.getPitch()) * Constants.LINE_SPACING / 2.0;
         int noteY = (int) (startY + offset);
         
+        int indexRemainder = Math.abs(noteIndex) % 12;
         for (int r : Constants.HALF_NOTE_REMAINDERS) {
-            if (Math.abs(noteIndex) % 12 == r) {
-                noteY -= Constants.LINE_SPACING / 2.0;
+            if (r > indexRemainder) {
                 break;
             }
+            noteY -= Constants.LINE_SPACING / 2.0;
         }
-        
+
         return new Point(noteX, noteY);
     }
 
