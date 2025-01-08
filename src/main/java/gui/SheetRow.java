@@ -41,20 +41,45 @@ public class SheetRow {
     public Point getNotePosition(Note note, int noteIndex, int canvasWidth) {
         int xOffset = (canvasWidth - Constants.ROW_WIDTH) / 2;
         int noteX = xOffset + 50 + (noteIndex * 50);
-
-        double middleCPitch = 10.0;
-        double offset = (middleCPitch - note.getPitch()) * Constants.LINE_SPACING / 2.0;
-        int noteY = (int) (startY + offset);
-        
-        int indexRemainder = Math.abs(noteIndex) % 12;
-        for (int r : Constants.HALF_NOTE_REMAINDERS) {
-            if (r > indexRemainder) {
-                break;
-            }
-            noteY -= Constants.LINE_SPACING / 2.0;
-        }
-
+    
+        double offsetPerHalfStep = Constants.LINE_SPACING / 2.0;
+    
+        int absoluteDiatonicOffset = calculateAbsoluteDiatonicOffset(note.getPitch());
+    
+        int noteY = (int) (startY + ((absoluteDiatonicOffset + 10) * offsetPerHalfStep));
+    
         return new Point(noteX, noteY);
+    }
+    
+    private int calculateAbsoluteDiatonicOffset(double pitch) {
+        int intPitch = (int) pitch;
+        int octaveOffset = (int)Math.floor(intPitch / 12.0) * 7;;
+        int normalizedPitch = Math.floorMod(intPitch, 12);
+    
+        int diatonicOffset = calculateDiatonicOffset(normalizedPitch);
+    
+        return -octaveOffset + diatonicOffset; 
+    }
+    
+    
+    private int calculateDiatonicOffset(int normalizedPitch) {
+        switch (normalizedPitch) {
+            case 0: return 0;  // C
+            case 2: return -1; // D
+            case 4: return -2; // E
+            case 5: return -3; // F
+            case 7: return -4; // G
+            case 9: return -5; // A
+            case 11: return -6; // B
+            default:
+                // Sharps
+                if (normalizedPitch == 1) return 0;  // C#
+                if (normalizedPitch == 3) return -1; // D#
+                if (normalizedPitch == 6) return -3; // F#
+                if (normalizedPitch == 8) return -4; // G#
+                if (normalizedPitch == 10) return -5; // A#
+        }
+        return 0;
     }
 
     public void draw(Graphics2D g2d, int canvasWidth) {

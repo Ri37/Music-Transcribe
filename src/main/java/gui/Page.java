@@ -45,57 +45,42 @@ public class Page {
     public static Page createBociBociPage() {
         Page page = new Page();
 
+        /*
         SheetRow firstRow = page.rows.get(0);
         SheetRow secondRow = page.rows.get(1);
-        SheetRow thirdRow = page.rows.get(2);
-    
+
         // Elso utem: Boci boci tarka
-        firstRow.addNote(new Note(-2, "8th"));  // Bo-
         firstRow.addNote(new Note(0, "8th"));  // Bo-
-        firstRow.addNote(new Note(2, "8th"));  // ci
+        firstRow.addNote(new Note(4, "8th"));  // ci
         firstRow.addNote(new Note(0, "8th"));  // bo-
-        firstRow.addNote(new Note(2, "8th"));  // ci
-        firstRow.addNote(new Note(4, "quarter")); // tar-
-        firstRow.addNote(new Note(4, "quarter")); // ka
+        firstRow.addNote(new Note(4, "8th"));  // ci
+        firstRow.addNote(new Note(7, "quarter")); // tar-
+        firstRow.addNote(new Note(7, "quarter")); // ka
     
         // Masodik utem: Se füle se farka
         firstRow.addNote(new Note(0, "8th"));  // Se
-        firstRow.addNote(new Note(2, "8th"));  // fü-
+        firstRow.addNote(new Note(4, "8th"));  // fü-
         firstRow.addNote(new Note(0, "8th"));  // le
-        firstRow.addNote(new Note(2, "8th"));  // se
-        firstRow.addNote(new Note(4, "quarter")); // far-
-        firstRow.addNote(new Note(4, "quarter")); // ka
+        firstRow.addNote(new Note(4, "8th"));  // se
+        firstRow.addNote(new Note(7, "quarter")); // far-
+        firstRow.addNote(new Note(7, "quarter")); // ka
     
         // Harmadik utem: Oda megyünk lakni
-        secondRow.addNote(new Note(7, "8th"));  // O-
-        secondRow.addNote(new Note(6, "8th"));  // da
-        secondRow.addNote(new Note(5, "8th"));  // me-
-        secondRow.addNote(new Note(4, "8th"));  // gyünk
-        secondRow.addNote(new Note(3, "quarter")); // lak-
-        secondRow.addNote(new Note(5, "quarter")); // ni
+        secondRow.addNote(new Note(12, "8th"));  // O-
+        secondRow.addNote(new Note(11, "8th"));  // da
+        secondRow.addNote(new Note(9, "8th"));  // me-
+        secondRow.addNote(new Note(7, "8th"));  // gyünk
+        secondRow.addNote(new Note(5, "quarter")); // lak-
+        secondRow.addNote(new Note(9, "quarter")); // ni
     
         // Negyedik utem: Ahol tejet kapni
-        secondRow.addNote(new Note(4, "8th"));  // A-
-        secondRow.addNote(new Note(3, "8th"));  // hol
-        secondRow.addNote(new Note(2, "8th"));  // te-
-        secondRow.addNote(new Note(1, "8th"));  // jet
+        secondRow.addNote(new Note(7, "8th"));  // A-
+        secondRow.addNote(new Note(5, "8th"));  // hol
+        secondRow.addNote(new Note(4, "8th"));  // te-
+        secondRow.addNote(new Note(2, "8th"));  // jet
         secondRow.addNote(new Note(0, "quarter")); // kap-
         secondRow.addNote(new Note(0, "quarter")); // ni
-
-        thirdRow.addNote(new Note(-6, "8th"));  // A-
-        thirdRow.addNote(new Note(-5, "8th"));  // hol
-        thirdRow.addNote(new Note(-4, "8th"));  // te-
-        thirdRow.addNote(new Note(-3, "8th"));  // jet
-        thirdRow.addNote(new Note(-2, "quarter")); // kap-
-        thirdRow.addNote(new Note(-1, "quarter")); // ni
-
-        thirdRow.addNote(new Note(9, "8th"));  // A-
-        thirdRow.addNote(new Note(10, "8th"));  // hol
-        thirdRow.addNote(new Note(11, "8th"));  // te-
-        thirdRow.addNote(new Note(12, "8th"));  // jet
-        thirdRow.addNote(new Note(13, "quarter")); // kap-
-        thirdRow.addNote(new Note(14, "quarter")); // ni
-
+        */
         return page;
     }      
 }

@@ -4,11 +4,13 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
+import java.awt.Font;
+import java.awt.geom.AffineTransform;
 
 import gui.Constants.NoteType;
 
 public class Note {
-    private final int pitch; // Pitch value, e.g., 0 = Middle C, 2 = D, 4 = E, etc.
+    private final int pitch; // Pitch value, e.g., 0 = Middle C, 1 = C#, 2 = D, etc.
     private final String length; // "full", "half", "quarter", "8th", "16th"
     private NoteType noteType;
     private float startTime = 0; //in seconds
@@ -53,72 +55,74 @@ public class Note {
     }
 
     public void draw(Graphics2D g2d, int x, int y) {
-        int staffSpacing = Constants.LINE_SPACING / 2;
+        int staffSpacing = Constants.LINE_SPACING;
         int ledgerY;
-        int topLinePitch = 10;
-        int bottomLinePitch = 2;
+        int topLinePitch = -2;
+        int bottomLinePitch = -10;
 
         Color originalColor = g2d.getColor();
         Stroke originalStroke = g2d.getStroke();
+        Font originalFont = g2d.getFont();
         
         for (int r : Constants.HALF_NOTE_REMAINDERS) {
-            if (Math.abs(pitch) % 12 == r) {
-                g2d.drawString("#", x - 10, y);
+            if (Math.abs(pitch + 60) % 12 == r) {
+                Font largerFont = originalFont.deriveFont(originalFont.getSize() + 5.0f);
+                g2d.setFont(largerFont);
+                g2d.drawString("#", x - 10, y + 5);
+                g2d.setFont(originalFont);
             }
         }
     
-        if (pitch > topLinePitch || pitch < bottomLinePitch) {
-            ledgerY = y;
-            if (pitch % 2 != 0) {
-                if (bottomLinePitch > pitch) {
-                    ledgerY = y - staffSpacing;
-                }
-                if (pitch > topLinePitch) {
-                    ledgerY = y + staffSpacing;
+        int diatonicOffset = calculateAbsoluteDiatonicOffset(pitch);
+
+        if (diatonicOffset > topLinePitch) {
+            int extraLines = (diatonicOffset - topLinePitch + 1) / 2;
+            for (int i = 0; i < extraLines; i++) {
+                int isOnLine = (diatonicOffset % 2 == 0) ? 0 : 1;
+                ledgerY = y - (i + isOnLine) * staffSpacing + staffSpacing/2*isOnLine;
+                if (diatonicOffset % 2 == 0 || i < extraLines - 1) {
+                    g2d.drawLine(x - 10, ledgerY, x + 30, ledgerY);
                 }
             }
-
-            if (pitch > topLinePitch) {
-                for (int currentPitch = topLinePitch + 2; currentPitch <= pitch; currentPitch += 2) {
+        } else if (diatonicOffset < bottomLinePitch) {
+            int extraLines = (bottomLinePitch - diatonicOffset + 1) / 2;
+            for (int i = 0; i < extraLines; i++) {
+                int isOnLine = (diatonicOffset % 2 == 0) ? 0 : 1;
+                ledgerY = y + (i + isOnLine) * staffSpacing - staffSpacing/2*isOnLine;
+                if (diatonicOffset % 2 == 0 || i < extraLines - 1) {
                     g2d.drawLine(x - 10, ledgerY, x + 30, ledgerY);
-                    ledgerY += staffSpacing * 2;
-                }
-            } else {
-                for (int currentPitch = bottomLinePitch + 2; currentPitch >= pitch; currentPitch -= 2) {
-                    g2d.drawLine(x - 10, ledgerY, x + 30, ledgerY);
-                    ledgerY -= staffSpacing * 2;
                 }
             }
         }
-
+        
         if (this.noteType == NoteType.BLUEPRINT) {
             g2d.setColor(Color.GREEN);
         }
 
         switch (length) {
             case "full":
-                g2d.drawOval(x, y - 5, 20, 10);
+                drawRotatedOval(g2d, x, y - 5, 20, 10, -15);
                 break;
             case "half":
-                g2d.drawOval(x, y - 5, 20, 10);
+                drawRotatedOval(g2d, x, y - 5, 20, 10, -15);
                 g2d.drawLine(x + 20, y, x + 20, y - 50);
                 break;
             case "quarter":
-                g2d.fillOval(x, y - 5, 20, 10);
+                drawRotatedFilledOval(g2d, x, y - 5, 20, 10, -15);
                 g2d.drawLine(x + 20, y, x + 20, y - 50);
                 break;
             case "8th":
-                g2d.fillOval(x, y - 5, 20, 10);
+                drawRotatedFilledOval(g2d, x, y - 5, 20, 10, -15);
                 g2d.drawLine(x + 20, y, x + 20, y - 50);
                 g2d.drawLine(x + 20, y - 50, x + 30, y - 40);
                 break;
             case "16th":
-                g2d.fillOval(x, y - 5, 20, 10);
+                drawRotatedFilledOval(g2d, x, y - 5, 20, 10, -15);
                 g2d.drawLine(x + 20, y, x + 20, y - 50);
                 g2d.drawLine(x + 20, y - 45, x + 30, y - 35);
                 g2d.drawLine(x + 20, y - 50, x + 30, y - 40);
                 break;
-        }
+        }        
 
         if (this.noteType == NoteType.HOVERING) {
             int startX = x - 15;
@@ -135,6 +139,52 @@ public class Note {
         g2d.setStroke(originalStroke);
         g2d.setColor(originalColor);
     }
+
+    private int calculateAbsoluteDiatonicOffset(double pitch) {
+        int intPitch = (int) pitch;
+        int octaveOffset = (int)Math.floor(intPitch / 12.0) * 7;;
+        int normalizedPitch = Math.floorMod(intPitch, 12);
+    
+        int diatonicOffset = calculateDiatonicOffset(normalizedPitch);
+    
+        return -octaveOffset + diatonicOffset; 
+    }
+    
+    
+    private int calculateDiatonicOffset(int normalizedPitch) {
+        switch (normalizedPitch) {
+            case 0: return 0;  // C
+            case 2: return -1; // D
+            case 4: return -2; // E
+            case 5: return -3; // F
+            case 7: return -4; // G
+            case 9: return -5; // A
+            case 11: return -6; // B
+            default:
+                // Sharps
+                if (normalizedPitch == 1) return 0;  // C#
+                if (normalizedPitch == 3) return -1; // D#
+                if (normalizedPitch == 6) return -3; // F#
+                if (normalizedPitch == 8) return -4; // G#
+                if (normalizedPitch == 10) return -5; // A#
+        }
+        return 0;
+    }
+
+    private void drawRotatedOval(Graphics2D g2d, int x, int y, int width, int height, double angle) {
+        AffineTransform originalTransform = g2d.getTransform();
+        g2d.rotate(Math.toRadians(angle), x + width / 2.0, y + height / 2.0);
+        g2d.drawOval(x, y, width, height);
+        g2d.setTransform(originalTransform);
+    }
+    
+    private void drawRotatedFilledOval(Graphics2D g2d, int x, int y, int width, int height, double angle) {
+        AffineTransform originalTransform = g2d.getTransform();
+        g2d.rotate(Math.toRadians(angle), x + width / 2.0, y + height / 2.0);
+        g2d.fillOval(x, y, width, height);
+        g2d.setTransform(originalTransform);
+    }
+    
     
     public int getTick() { //PPQ 24 mellett
     	return switch (length) {
